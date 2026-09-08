@@ -12,9 +12,11 @@
 论文：[Multi-Task Learning Using Uncertainty to Weigh Losses for Scene Geometry and Semantics](https://arxiv.org/pdf/1705.07115)
 
 主要思想是对于不确定性大的任务，loss权重小，对于不确定性小的任务，loss权重大。使用可学习参数 $\sigma$ 来度量任务的不确定性：
+
 $$
 L_{task_i} = \frac{1}{2 \sigma_i^2} L_i + \text{log} \sigma_i
 $$
+
 代码实现中，一般为了保证损失非负，$\text{log} \sigma_i$ 会使用 $\log (1 + \sigma_i)$。而且由于需要保证 $\sigma_i > 0$ 且 $2 \sigma_i^2$ 需要初始化为1 ，所以一般定义可学习参数 $\sigma = e^x$，其中 $x$ 是可学习参数，初始化为 $\text{ln} \frac{1}{\sqrt{2}}$。
 
 ## GradNorm
@@ -40,12 +42,14 @@ $$
 
 **目标梯度范数与GradNorm损失**
 
-每个任务 $i$ 的目标梯度范数定义为：$\bar{G}_w^(t) \times [r_i(t)]^{\alpha}$ ，其中 $\bar{G}_w^{(i)}(t)$ 是所有任务梯度范数的平均值，表示所有任务的平均梯度，$r_i(t)$ 是任务 $i$ 的相对逆训练速率，表示该任务的训练速率，$\alpha$ （不对称度）是用于调节梯度范数的超参数。这个目标梯度范数是理想情况下的梯度范数，即根据各个任务的训练速度，动态调节每个任务的对应梯度，使得所有任务的梯度保持相对一致。
+每个任务 $i$ 的目标梯度范数定义为：$\bar{G}_{\mathcal{W}}(t) \times [r_i(t)]^{\alpha}$ ，其中 $\bar{G}_{\mathcal{W}}(t)$ 是所有任务梯度范数的平均值，表示所有任务的平均梯度，$r_i(t)$ 是任务 $i$ 的相对逆训练速率，表示该任务的训练速率，$\alpha$ （不对称度）是用于调节梯度范数的超参数。这个目标梯度范数是理想情况下的梯度范数，即根据各个任务的训练速度，动态调节每个任务的对应梯度，使得所有任务的梯度保持相对一致。
 
 故可以定义GradNorm损失 —— 实际梯度范数与目标梯度范数的L1损失，让每个任务的实际梯度逐渐往目标梯度靠拢，从而更新每个任务的权重 $w_i(t)$：
+
 $$
-L_{grad}(t;w_i(t)) = \sum_i \left|G_{\mathcal{W}}^{(i)}(t) - \bar{G}_w^(t) \times [r_i(t)]^{\alpha} \right|
+L_{grad}(t;w_i(t)) = \sum_i \left|G_{\mathcal{W}}^{(i)}(t) - \bar{G}_{\mathcal{W}}(t) \times [r_i(t)]^{\alpha} \right|
 $$
+
 然后再用 $\nabla_{w_i(t)}\, L_{grad}$ 的梯度来更新 $w_i(t)$。注意，目标梯度范数这一项视作常数。更新完 $w_i(t)$ 后，需要重新归一化权重，使 $\sum_i w_i(t) = T$。
 
 接着正常更新模型参数：使用 $\nabla_{\mathcal{W}(t)}\, L(t)$ 来更新 $\mathcal{W}(t)$。
