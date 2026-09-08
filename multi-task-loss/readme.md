@@ -17,7 +17,7 @@ $$
 L_{task_i} = \frac{1}{2 \sigma_i^2} L_i + \text{log} \sigma_i
 $$
 
-代码实现中，一般为了保证损失非负，$\text{log} \sigma_i$ 会使用 $\log (1 + \sigma_i)$。而且由于需要保证 $\sigma_i > 0$ 且 $2 \sigma_i^2$ 需要初始化为1 ，所以一般定义可学习参数 $\sigma = e^x$，其中 $x$ 是可学习参数，初始化为 $\text{ln} \frac{1}{\sqrt{2}}$。
+代码实现中，一般为了保证损失非负， $\text{log} \sigma_i$ 会使用 $\log (1 + \sigma_i)$。而且由于需要保证 $\sigma_i > 0$ 且 $2 \sigma_i^2$ 需要初始化为1 ，所以一般定义可学习参数 $\sigma = e^x$，其中 $x$ 是可学习参数，初始化为 $\text{ln} \frac{1}{\sqrt{2}}$。
 
 ## GradNorm
 论文：[Gradient Normalization for Adaptive Loss Balancing in Deep Multitask Networks](https://proceedings.mlr.press/v80/chen18a/chen18a.pdf)
@@ -29,11 +29,11 @@ $$
 **梯度相关：**
 - $\mathcal{W}$： 施加GradNorm的参数，一般选择共享网络的最后一层参数。
 - $G_{\mathcal{W}}^{(i)}(t) = \left\lVert \nabla_{\mathcal{W}}\, w_i(t)L_i(t) \right\rVert_2$：第 $t$ 步，加权单任务损失 $w_i(t)L_i(t)$ 对所选权重 $\mathcal{W}$ 的梯度的 L2 范数。
-- $\bar{G}_{\mathcal{W}}(t) = \mathbb{E}_{task}\left[G_{\mathcal{W}}^{(i)}(t)\right]$：第 $t$ 步，所有任务梯度范数的平均值，作为比较各任务梯度大小的公共尺度。
+- $`\`bar{G}_{\mathcal{W}}(t) = \mathbb{E}_{task}\left[G_{\mathcal{W}}^{(i)}(t)\right]`$：第 $t$ 步，所有任务梯度范数的平均值，作为比较各任务梯度大小的公共尺度。
 
 **训练速率相关：**
-- $\tilde{L}_i(t) = L_i(t)/L_i(0)$：损失比率（loss ratio），是任务 $i$ 训练速率的**逆**度量——$\tilde{L}_i(t)$ 越小，说明该任务训练得越快。
-- $r_i(t) = \tilde{L}_i(t)/\mathbb{E}_{task}\left[\tilde{L}_i(t)\right]$：相对逆训练速率（relative inverse training rate），即任务 $i$ 的损失比率除以所有任务损失比率的平均值。$r_i(t)$ 越大，说明该任务训练得越慢，应给它更大的梯度来加速。
+- $\tilde{L}_i(t) = L_i(t)/L_i(0)$：损失比率（loss ratio），是任务 $i$ 训练速率的**逆**度量—— $\tilde{L}_i(t)$ 越小，说明该任务训练得越快。
+- $`r_i(t) = \tilde{L}_i(t)/\mathbb{E}_{task}\left[\tilde{L}_i(t)\right]`$：相对逆训练速率（relative inverse training rate），即任务 $i$ 的损失比率除以所有任务损失比率的平均值。$r_i(t)$ 越大，说明该任务训练得越慢，应给它更大的梯度来加速。
 
 > 注：若 $L_i(0)$ 对初始化过于敏感，则
 > - 理论初始损失：可用理论初始损失代替（如 $C$ 类交叉熵用 $\log C$），此时分类器为一个随机分类器。
@@ -42,7 +42,7 @@ $$
 
 **目标梯度范数与GradNorm损失**
 
-每个任务 $i$ 的目标梯度范数定义为：$\bar{G}_{\mathcal{W}}(t) \times [r_i(t)]^{\alpha}$ ，其中 $\bar{G}_{\mathcal{W}}(t)$ 是所有任务梯度范数的平均值，表示所有任务的平均梯度，$r_i(t)$ 是任务 $i$ 的相对逆训练速率，表示该任务的训练速率，$\alpha$ （不对称度）是用于调节梯度范数的超参数。这个目标梯度范数是理想情况下的梯度范数，即根据各个任务的训练速度，动态调节每个任务的对应梯度，使得所有任务的梯度保持相对一致。
+每个任务 $i$ 的目标梯度范数定义为： $`\bar{G}_{\mathcal{W}}(t) \times [r_i(t)]^{\alpha}`$ ，其中 $`\bar{G}_{\mathcal{W}}(t)`$ 是所有任务梯度范数的平均值，表示所有任务的平均梯度， $r_i(t)$ 是任务 $i$ 的相对逆训练速率，表示该任务的训练速率， $\alpha$ （不对称度）是用于调节梯度范数的超参数。这个目标梯度范数是理想情况下的梯度范数，即根据各个任务的训练速度，动态调节每个任务的对应梯度，使得所有任务的梯度保持相对一致。
 
 故可以定义GradNorm损失 —— 实际梯度范数与目标梯度范数的L1损失，让每个任务的实际梯度逐渐往目标梯度靠拢，从而更新每个任务的权重 $w_i(t)$：
 
