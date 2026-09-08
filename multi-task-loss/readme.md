@@ -45,6 +45,11 @@ $$
 $$
 L_{grad}(t;w_i(t)) = \sum_i \left|G_{\mathcal{W}}^{(i)}(t) - \bar{G}_w^(t) \times [r_i(t)]^{\alpha} \right|
 $$
-然后再用 $\nabla_{w_i(t)}\, L_{grad}$ 的梯度来更新 $w_i(t)$。注意，目标梯度范数这一项视作常数。
+然后再用 $\nabla_{w_i(t)}\, L_{grad}$ 的梯度来更新 $w_i(t)$。注意，目标梯度范数这一项视作常数。更新完 $w_i(t)$ 后，需要重新归一化权重，使 $\sum_i w_i(t) = T$。
 
-接着正常更新模型参数：使用 $\nabla_{\mathcal{W}(t)}\, L(t)$ 来更新 $\mathcal{W}(t)$
+接着正常更新模型参数：使用 $\nabla_{\mathcal{W}(t)}\, L(t)$ 来更新 $\mathcal{W}(t)$。
+
+详细的算法流程如下：
+![GradNorm算法流程](image/readme/GradNorm算法流程.png)
+
+## 
