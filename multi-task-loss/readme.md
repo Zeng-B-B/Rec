@@ -57,4 +57,17 @@ $$
 详细的算法流程如下：
 ![GradNorm算法流程](image/readme/GradNorm算法流程.png)
 
-## 
+## 动态权重平均（DWA）
+论文：[End-to-End Multi-Task Learning with Attention](https://openaccess.thecvf.com/content_CVPR_2019/papers/Liu_End-To-End_Multi-Task_Learning_With_Attention_CVPR_2019_paper.pdf)
+
+这个方法比较简单：任务的收敛速度可以用学习速度来表示，学习速度快的任务对应的loss权重小，学习速度慢的任务对应的loss权重大。
+
+首先，任务的学习速度表示为第 $t-1$ 步和第 $t-2$ 步的损失比值 $w_k(t-1) = \frac{L_k(t-1)}{L_k(t-2)}$：该值越小，说明该任务学习得越快。然后将该比值当作任务的loss权重进行重新归一化：
+
+$$
+\lambda_k(t) = K \frac{\exp (w_k(t-1) / \tau)}{\sum_i \exp (w_i(t-1) / \tau)}
+$$
+
+DWA通过对学习速度进行归一化，给学习速度快的任务分配小权重，给学习速度慢的任务分配大权重。
+
+
