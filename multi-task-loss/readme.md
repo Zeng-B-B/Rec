@@ -29,7 +29,7 @@ $$
 **梯度相关：**
 - $\mathcal{W}$： 施加GradNorm的参数，一般选择共享网络的最后一层参数。
 - $G_{\mathcal{W}}^{(i)}(t) = \left\lVert \nabla_{\mathcal{W}}\, w_i(t)L_i(t) \right\rVert_2$：第 $t$ 步，加权单任务损失 $w_i(t)L_i(t)$ 对所选权重 $\mathcal{W}$ 的梯度的 L2 范数。
-- $`\`bar{G}_{\mathcal{W}}(t) = \mathbb{E}_{task}\left[G_{\mathcal{W}}^{(i)}(t)\right]`$：第 $t$ 步，所有任务梯度范数的平均值，作为比较各任务梯度大小的公共尺度。
+- $`\bar{G}_{\mathcal{W}}(t) = \mathbb{E}_{task}\left[G_{\mathcal{W}}^{(i)}(t)\right]`$：第 $t$ 步，所有任务梯度范数的平均值，作为比较各任务梯度大小的公共尺度。
 
 **训练速率相关：**
 - $\tilde{L}_i(t) = L_i(t)/L_i(0)$：损失比率（loss ratio），是任务 $i$ 训练速率的**逆**度量—— $\tilde{L}_i(t)$ 越小，说明该任务训练得越快。
