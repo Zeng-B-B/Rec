@@ -35,7 +35,8 @@ End-to-End Multi-Task Learning with Attention (Liu et al., CVPR 2019, Sec 4.1.3)
     若要严格对齐论文，可每个 epoch 用该 epoch 的平均损失调用一次 update()。
 """
 
-from typing import List, Optional, Sequence, Union
+from collections import deque
+from typing import Deque, Optional, Sequence, Union
 
 import torch
 import torch.nn as nn
@@ -73,9 +74,10 @@ class DWA(nn.Module):
         self.clip = clip
         self.eps = eps
 
-        # 损失历史：每个元素是形状 [K] 的 detach 张量，按调用顺序排列。
-        # 不用 buffer 注册，避免 state_dict 随训练步数无限增长。
-        self.loss_history: List[torch.Tensor] = []
+        # 损失历史：只保留最近两次损失 L(t-1)、L(t-2)（DWA 权重仅依赖它们），
+        # 用 maxlen=2 的 deque 自动淘汰最旧记录，避免随训练步数无限增长。
+        # 不注册为 buffer，避免 state_dict 混入训练过程中的临时状态。
+        self.loss_history: Deque[torch.Tensor] = deque(maxlen=2)
         self._cur_weights = torch.ones(num_tasks)
 
     # ------------------------------------------------------------------ #
@@ -176,7 +178,7 @@ if __name__ == "__main__":
 
         logits = net(x)                                 # [B, 3]
         losses = [bce(logits[:, i], y[:, i]) for i in range(3)]
-
+        print(losses)
         # 一行替代 sum(losses).backward()
         w = dwa.backward(losses)
 
